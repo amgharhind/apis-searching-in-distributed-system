@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documents Management</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #121212;
+            color: white;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 250px;
+            background-color: #121212;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-logo {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sidebar-logo img {
+            width: 50px;
+            height: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            width: 100%;
+        }
+
+        .sidebar-menu li a {
+            display: block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar-menu li a:hover,
+        .sidebar-menu li a.active {
+            background-color: #ef5b25;
+        }
+
+        /* Top Navbar */
+        .top-nav {
+            width: 100%;
+            background-color: #121212;
+            padding: 10px 15px;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .top-nav button {
+            background-color: #ef5b25;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+
+        .top-nav button:hover {
+            background-color: #ed4c11;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 50px; /* Adjust for top-nav height */
+            margin-left: 250px;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            background-color: white;
+            color: #121212;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        .main-content.full-width {
+            margin-left: 0;
+        }
+
+        /* Section Styling */
+        section {
+            padding: 20px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            color: #121212;
+            display: none; /* Hidden by default */
+        }
+
+        section.active {
+            display: block; /* Display the active section */
+        }
+
+        form input, form select, form textarea, form button {
+            margin: 5px 0;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        button {
+            background-color: #ef5b25;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ed4c11;
+        }
+
+        h2 {
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+        }
+
+        #content div {
+            margin-top: 20px;
+            white-space: pre-wrap; /* Keeps JSON output formatted properly */
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        @media screen and (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.hidden {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+      .nav-bar {
+        margin-top: 20px;
+        background-color: #121212;
+        padding: 10px 0;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .nav-bar ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+    }
+
+    .nav-bar li {
+        flex: 1;
+        text-align: center;
+    }
+
+    .nav-bar li a {
+        display: block;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        transition: background-color 0.3s, color 0.3s;
+        border-radius: 5px;
+    }
+
+    .nav-bar li a:hover,
+    .nav-bar li a.active {
+        background-color: #ef5b25;
+        color: white;
+    }
+</style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+ <div class="sidebar-logo">
+        <img src="integrity.png" alt="Logo">
+        <h2>Distributed Search</h2>
+    </div>
+    <ul class="sidebar-menu">
+        <li><a href="search_without_cache.html"><span>🔍</span> Search</a></li>
+        <li><a href="cache.html"><span>🗂️</span> Cache</a></li>
+        <li><a href="cluster.html"><span>🖥️</span> Cluster</a></li>
+        <li><a href="documents.html" class="active"><span>📄</span> Documents</a></li>
+        <li><a href="re-ranking.html"><span>📊</span> Re-ranking</a></li>
+    </ul>
+</div>
+
+<!-- Top Navbar -->
+<div class="top-nav">
+    <button onclick="toggleSidebar()">☰</button>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <ul>
+            <li><a href="#getAllDocuments" onclick="showSection('getAllDocuments')">Get All Documents</a></li>
+            <li><a href="#getDocumentById" onclick="showSection('getDocumentById')">Get Document by ID</a></li>
+            <li><a href="#updateDocument" onclick="showSection('updateDocument')">Update Document</a></li>
+            <li><a href="#deleteDocument" onclick="showSection('deleteDocument')">Delete Document</a></li>
+            <li><a href="#deleteByCriteria" onclick="showSection('deleteByCriteria')">Delete by Criteria</a></li>
+            <li><a href="#filterDocuments" onclick="showSection('filterDocuments')">Filter Documents</a></li>
+            <li><a href="#uploadDocument" onclick="showSection('uploadDocument')">Upload Document</a></li>
+            <li><a href="#uploadBatch" onclick="showSection('uploadBatch')">Upload Batch</a></li>
+           <!-- <li><a href="#uploadFromUrl" onclick="showSection('uploadFromUrl')">Upload From URL</a></li>-->
+        </ul>
+    </nav>
+
+    <div id="content">
+        <!-- Example Section: Get All Documents -->
+        <section id="getAllDocuments" class="active">
+            <h2>Get All Documents</h2>
+            <button id="getAllDocumentsButton">Fetch Documents</button>
+            <div id="getAllDocumentsResults"></div>
+        </section>
+
+        <!-- Example Section: Get Document by ID -->
+        <section id="getDocumentById">
+            <h2>Get Document by ID</h2>
+            <form id="getDocumentByIdForm">
+                <input type="text" id="documentId" name="id" placeholder="Enter Document ID" required>
+                <button type="submit">Fetch Document</button>
+            </form>
+            <div id="getDocumentByIdResults"></div>
+        </section>
+
+        <!-- Add other sections here -->
+        <!-- Update Document -->
+        <section id="updateDocument">
+            <h2>Update Document</h2>
+            <form id="updateDocumentForm">
+                <input type="text" id="updateDocumentId" name="id" placeholder="Enter Document ID" required>
+                <textarea id="updateFields" name="fields" placeholder='Enter fields as JSON, e.g., {"key": "value"}' required></textarea>
+                <button type="submit">Update Document</button>
+            </form>
+            <div id="updateDocumentResults"></div>
+        </section>
+
+        <!-- Delete Document -->
+        <section id="deleteDocument">
+            <h2>Delete Document</h2>
+            <form id="deleteDocumentForm">
+                <input type="text" id="deleteDocumentId" name="id" placeholder="Enter Document ID" required>
+                <button type="submit">Delete Document</button>
+            </form>
+            <div id="deleteDocumentResults"></div>
+        </section>
+        <!-- Delete Documents by Criteria -->
+        <section id="deleteByCriteria">
+            <h2>Delete Documents by Criteria</h2>
+            <form id="deleteByCriteriaForm">
+                <input type="text" id="deleteField" name="field" placeholder="Field" required>
+                <input type="text" id="deleteValue" name="value" placeholder="Value" required>
+                <button type="submit">Delete Documents</button>
+            </form>
+            <div id="deleteByCriteriaResults"></div>
+        </section>
+
+        <!-- Filter Documents -->
+        <section id="filterDocuments">
+            <h2>Filter Documents</h2>
+            <form id="filterDocumentsForm">
+                <input type="text" id="includeField" name="includeField" placeholder="Include Field (optional)">
+                <input type="text" id="includeValue" name="includeValue" placeholder="Include Value (optional)">
+                <input type="text" id="excludeField" name="excludeField" placeholder="Exclude Field (optional)">
+                <input type="text" id="excludeValue" name="excludeValue" placeholder="Exclude Value (optional)">
+                <button type="submit">Filter Documents</button>
+            </form>
+            <div id="filterDocumentsResults"></div>
+        </section>
+
+        <!-- Upload Document -->
+        <section id="uploadDocument">
+            <h2>Upload Document</h2>
+            <form id="uploadDocumentForm" enctype="multipart/form-data">
+                <input type="file" id="uploadFile" name="file" required>
+                <button type="submit">Upload</button>
+            </form>
+            <div id="uploadDocumentResults"></div>
+        </section>
+
+        <!-- Upload Batch -->
+        <section id="uploadBatch">
+            <h2>Upload Batch</h2>
+            <form id="uploadBatchForm" enctype="multipart/form-data">
+                <input type="file" id="uploadFiles" name="files" multiple required>
+                <button type="submit">Upload Batch</button>
+            </form>
+            <div id="uploadBatchResults"></div>
+        </section>
+
+        <!-- Upload From URL -->
+        <section id="uploadFromUrl">
+            <h2>Upload Document from URL</h2>
+            <form id="uploadFromUrlForm">
+                <input type="url" id="uploadUrl" name="url" placeholder="Enter file URL" required>
+                <button type="submit">Upload</button>
+            </form>
+            <div id="uploadFromUrlResults"></div>
+        </section>
+    </div>
+</div>
+
+<script>
+    // Function to toggle the sidebar
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        sidebar.classList.toggle('hidden');
+        mainContent.classList.toggle('full-width');
+    }
+
+    // Function to display specific sections
+    function showSection(sectionId) {
+        document.querySelectorAll('section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(sectionId).classList.add('active');
+    }
+
+    // Generic function for API requests
+    async function apiRequest(endpoint, method = 'GET', body = null) {
+        try {
+            const options = { method };
+            if (body) {
+                options.body = body instanceof FormData ? body : JSON.stringify(body);
+                if (!(body instanceof FormData)) {
+                    options.headers = { 'Content-Type': 'application/json' };
+                }
+            }
+            const response = await fetch(endpoint, options);
+
+            // Handle non-OK HTTP responses
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || response.statusText);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('API Request Error:', error);
+            return { error: error.message }; // Pass error back for display
+        }
+    }
+
+    // Event Listeners
+    document.getElementById('getAllDocumentsButton').addEventListener('click', async () => {
+        const resultsDiv = document.getElementById('getAllDocumentsResults');
+        resultsDiv.innerText = 'Loading...'; // Show loading indicator
+        const results = await apiRequest('/api/documents');
+        if (results.error) {
+            alert(`Error: ${results.error}`);
+        }
+        resultsDiv.innerText = JSON.stringify(results, null, 2);
+    });
+
+    document.getElementById('getDocumentByIdForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const documentId = document.getElementById('documentId').value.trim();
+        if (!documentId) {
+            alert('Document ID cannot be empty.');
+            return;
+        }
+        const results = await apiRequest(`/api/documents/${documentId}`);
+        if (results.error) {
+            alert(`Error: ${results.error}`);
+        }
+        document.getElementById('getDocumentByIdResults').innerText = JSON.stringify(results, null, 2);
+    });
+
+    document.getElementById('updateDocumentForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const documentId = document.getElementById('updateDocumentId').value.trim();
+        const fieldsToUpdateInput = document.getElementById('updateFields').value;
+        let fieldsToUpdate;
+
+        try {
+            fieldsToUpdate = JSON.parse(fieldsToUpdateInput);
+        } catch (error) {
+            alert('Invalid JSON format in fields to update.');
+            return;
+        }
+
+        const results = await apiRequest(`/api/documents/${documentId}`, 'PATCH', fieldsToUpdate);
+        if (results.error) {
+            alert(`Error: ${results.error}`);
+        }
+        document.getElementById('updateDocumentResults').innerText = JSON.stringify(results, null, 2);
+    });
+
+    document.getElementById('deleteDocumentForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const documentId = document.getElementById('deleteDocumentId').value.trim();
+        if (!documentId) {
+            alert('Document ID cannot be empty.');
+            return;
+        }
+        const results = await apiRequest(`/api/documents/${documentId}`, 'DELETE');
+        if (results.error) {
+            alert(`Error: ${results.error}`);
+        }
+        document.getElementById('deleteDocumentResults').innerText = JSON.stringify(results, null, 2);
+    });
+
+    document.getElementById('deleteByCriteriaForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const field = document.getElementById('deleteField').value.trim();
+        const value = document.getElementById('deleteValue').value.trim();
+        if (!field || !value) {
+            alert('Both field and value must be provided.');
+            return;
+        }
+        const results = await apiRequest(`/api/documents/batch?field=${field}&value=${value}`, 'DELETE');
+        if (results.error) {
+            alert(`Error: ${results.error}`);
+        }
+        document.getElementById('deleteByCriteriaResults').innerText = JSON.stringify(results, null, 2);
+    });
+
+    document.getElementById('filterDocumentsForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const includeField = document.getElementById('includeField').value.trim();
+        const includeValue = document.getElementById('includeValue').value.trim();
+        const excludeField = document.getElementById('excludeField').value.trim();
+        const excludeValue = document.getElementById('excludeValue').value.trim();
+
+        const params = new URLSearchParams({
+            includeField, includeValue, excludeField, excludeValue,
+        }).toString();
+
+        const results = await apiRequest(`/api/documents/filter?${params}`);
+        if (results.error) {
+            alert(`Error: ${results.error}`);
+        }
+        document.getElementById('filterDocumentsResults').innerText = JSON.stringify(results, null, 2);
+    });
+
+    document.getElementById('uploadDocumentForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const fileInput = document.getElementById('uploadFile');
+        if (!fileInput.files.length) {
+            alert('Please select a file to upload.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        const results = await apiRequest('/api/documents_V2/upload', 'POST', formData);
+        if (results.error) {
+            alert(`Error: ${results.error}`);
+        }
+        document.getElementById('uploadDocumentResults').innerText = JSON.stringify(results, null, 2);
+    });
+
+    document.getElementById('uploadBatchForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const fileInput = document.getElementById('uploadFiles');
+        if (!fileInput.files.length) {
+            alert('Please select files to upload.');
+            return;
+        }
+
+        const formData = new FormData();
+        Array.from(fileInput.files).forEach(file => {
+            formData.append('files', file);
+        });
+
+        const results = await apiRequest('/api/documents_V2/upload/batch', 'POST', formData);
+        if (results.error) {
+            alert(`Error: ${results.error}`);
+        }
+        document.getElementById('uploadBatchResults').innerText = JSON.stringify(results, null, 2);
+    });
+
+    document.getElementById('uploadFromUrlForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const url = document.getElementById('uploadUrl').value.trim();
+        if (!url) {
+            alert('Please enter a valid URL.');
+            return;
+        }
+
+        const results = await apiRequest('/api/documents_V2/upload-from-url', 'POST', { url });
+        if (results.error) {
+            alert(`Error: ${results.error}`);
+        }
+        document.getElementById('uploadFromUrlResults').innerText = JSON.stringify(results, null, 2);
+    });
+</script>
+
+</body>
+</html>

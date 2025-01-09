@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking and Re-ranking</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #121212;
+            color: white;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 250px;
+            background-color: #121212;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-logo {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sidebar-logo img {
+            width: 50px;
+            height: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            width: 100%;
+        }
+
+        .sidebar-menu li a {
+            display: block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar-menu li a:hover,
+        .sidebar-menu li a.active {
+            background-color: #ef5b25;
+        }
+
+        /* Top Navbar */
+        .top-nav {
+            width: 100%;
+            background-color: #121212;
+            padding: 10px 15px;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .top-nav button {
+            background-color: #ef5b25;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+
+        .top-nav button:hover {
+            background-color: #ed4c11;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 50px; /* Adjust for top-nav height */
+            margin-left: 250px;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            background-color: white;
+            color: #121212;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        .main-content.full-width {
+            margin-left: 0;
+        }
+
+        /* Section Styling */
+        section {
+            padding: 20px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            color: #121212;
+            display: none; /* Hidden by default */
+        }
+
+        section.active {
+            display: block; /* Display the active section */
+        }
+
+        form input, form select, form button {
+            margin: 5px 0;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        button {
+            background-color: #ef5b25;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ed4c11;
+        }
+
+        h2 {
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+        }
+
+        #content div {
+            margin-top: 20px;
+            white-space: pre-wrap; /* Keeps JSON output formatted properly */
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        @media screen and (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.hidden {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        .nav-bar {
+            margin-top: 20px;
+            background-color: #121212;
+            padding: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-bar ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .nav-bar li {
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-bar li a {
+            display: block;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+            border-radius: 5px;
+        }
+
+        .nav-bar li a:hover,
+        .nav-bar li a.active {
+            background-color: #ef5b25;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <img src="integrity.png" alt="Logo">
+        <h2>Distributed Search</h2>
+    </div>
+    <ul class="sidebar-menu">
+        <li><a href="search_without_cache.html"><span>🔍</span> Search</a></li>
+        <li><a href="cache.html"><span>🗂️</span> Cache</a></li>
+        <li><a href="cluster.html"><span>🖥️</span> Cluster</a></li>
+        <li><a href="documents.html"><span>📄</span> Documents</a></li>
+        <li><a href="re-ranking.html" class="active"><span>📊</span> Re-ranking</a></li>
+    </ul>
+</div>
+
+<!-- Top Navbar -->
+<div class="top-nav">
+    <button onclick="toggleSidebar()">☰</button>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <ul>
+            <li><a href="#searchAndRank" onclick="showSection('searchAndRank')">Search and Rank</a></li>
+            <li><a href="#logInteraction" onclick="showSection('logInteraction')">Log Interaction</a></li>
+            <li><a href="#bm25Only" onclick="showSection('bm25Only')">BM25 Ranking</a></li>
+            <li><a href="#pipeline" onclick="showSection('pipeline')">Re-ranking Pipeline</a></li>
+        </ul>
+    </nav>
+
+    <div id="content">
+        <!-- Search and Rank -->
+        <section id="searchAndRank" class="active">
+            <h2>Search and Rank</h2>
+            <form id="searchAndRankForm">
+                <input type="text" id="query" name="query" placeholder="Enter Search Query" required>
+                <input type="text" id="field" name="field" placeholder="Field (optional)">
+                <input type="text" id="fileType" name="fileType" placeholder="File Type (optional)">
+                <input type="text" id="sortField" name="sortField" placeholder="Sort Field (optional)">
+                <select id="sortOrder" name="sortOrder">
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+                <input type="number" id="page" name="page" placeholder="Page (default 0)" min="0">
+                <input type="number" id="size" name="size" placeholder="Size (default 10)" min="1">
+                <button type="submit">Search and Rank</button>
+            </form>
+            <div id="searchAndRankResults">
+
+            </div>
+        </section>
+
+        <!-- Log Interaction -->
+        <section id="logInteraction">
+            <h2>Log Interaction</h2>
+            <form id="logInteractionForm">
+                <input type="text" id="documentId" name="documentId" placeholder="Enter Document ID" required>
+                <button type="submit">Log Interaction</button>
+            </form>
+            <div id="logInteractionResults"></div>
+        </section>
+
+        <!-- BM25 Ranking -->
+        <section id="bm25Only">
+            <h2>BM25 Ranking</h2>
+            <form id="bm25OnlyForm">
+                <input type="text" id="bm25Query" name="query" placeholder="Enter Search Query" required>
+                <input type="text" id="bm25Field" name="field" placeholder="Field (default: content)" required>
+                <input type="text" id="bm25Index" name="index" placeholder="Enter Index" required>
+                <input type="number" id="bm25Size" name="size" placeholder="Size (default 10)" min="1">
+                <button type="submit">Perform BM25 Ranking</button>
+            </form>
+            <div id="bm25OnlyResults"></div>
+        </section>
+
+        <!-- Re-ranking Pipeline -->
+        <section id="pipeline">
+            <h2>Re-ranking Pipeline</h2>
+            <form id="pipelineForm">
+                <input type="text" id="pipelineQuery" name="query" placeholder="Enter Search Query" required>
+                <input type="text" id="pipelineIndex" name="index" placeholder="Enter Index" required>
+                <button type="submit">Execute Pipeline</button>
+            </form>
+            <div id="pipelineResults"></div>
+        </section>
+    </div>
+</div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        sidebar.classList.toggle('hidden');
+        mainContent.classList.toggle('full-width');
+    }
+
+    function showSection(sectionId) {
+        document.querySelectorAll('section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(sectionId).classList.add('active');
+    }
+
+    const handleRequest = async (endpoint, method = 'GET', body = null) => {
+        try {
+            const options = { method };
+            if (body) options.body = body instanceof FormData ? body : JSON.stringify(body);
+            if (method !== 'GET' && !(body instanceof FormData)) options.headers = { 'Content-Type': 'application/json' };
+
+            const response = await fetch(endpoint, options);
+            return response.json();
+        } catch (error) {
+            return { error: error.message };
+        }
+    };
+
+    // Event Listeners
+     document.getElementById('searchAndRankForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const params = new URLSearchParams(formData).toString();
+
+        const startTime = performance.now(); // Start timing
+        try {
+            const response = await fetch(`/api/re-ranking/search?${params}`);
+            const data = await response.json();
+            const endTime = performance.now(); // End timing
+
+            const timeTaken = (endTime - startTime).toFixed(2); // Calculate response time
+
+            // Filter and display only required fields
+            const filteredResults = data.map(doc => ({
+                id: doc.id,
+                filename: doc.filename,
+                content: doc.content,
+                fileType: doc.fileType,
+                luceneScore: doc.luceneScore,
+                finalScore: doc.finalScore
+            }));
+
+            // Display the response time and filtered results
+            document.getElementById('searchAndRankResults').innerHTML = `
+                <p><strong>Response Time:</strong> ${timeTaken} ms</p>
+                <pre>${JSON.stringify(filteredResults, null, 4)}</pre>
+            `;
+        } catch (error) {
+            document.getElementById('searchAndRankResults').innerHTML = `
+                <p><strong>Error:</strong> ${error.message}</p>
+            `;
+        }
+    });
+    document.getElementById('logInteractionForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const documentId = document.getElementById('documentId').value;
+        const data = await handleRequest(`/api/re-ranking/interaction?documentId=${documentId}`, 'POST');
+        document.getElementById('logInteractionResults').innerText = JSON.stringify(data, null, 2);
+    });
+
+    document.getElementById('bm25OnlyForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const params = new URLSearchParams(formData).toString();
+        const data = await handleRequest(`/api/re-ranking/bm25-only?${params}`);
+        document.getElementById('bm25OnlyResults').innerText = JSON.stringify(data, null, 2);
+    });
+
+    document.getElementById('pipelineForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const params = new URLSearchParams(formData).toString();
+        const data = await handleRequest(`/api/re-ranking/pipeline?${params}`);
+        document.getElementById('pipelineResults').innerText = JSON.stringify(data, null, 2);
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cluster Management</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #121212;
+            color: white;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 250px;
+            background-color: #121212;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-logo {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sidebar-logo img {
+            width: 50px;
+            height: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            width: 100%;
+        }
+
+        .sidebar-menu li a {
+            display: block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar-menu li a:hover,
+        .sidebar-menu li a.active {
+            background-color: #ef5b25;
+        }
+
+        /* Top Navbar */
+        .top-nav {
+            width: 100%;
+            background-color: #121212;
+            padding: 10px 15px;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .top-nav button {
+            background-color: #ef5b25;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+
+        .top-nav button:hover {
+            background-color: #ed4c11;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 50px; /* Adjust for top-nav height */
+            margin-left: 250px;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            background-color: white;
+            color: #121212;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        .main-content.full-width {
+            margin-left: 0;
+        }
+
+        /* Section Styling */
+        section {
+            padding: 20px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            color: #121212;
+            display: none; /* Hidden by default */
+        }
+
+        section.active {
+            display: block; /* Display the active section */
+        }
+
+        form input, form select, form button {
+            margin: 5px 0;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        button {
+            background-color: #ef5b25;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ed4c11;
+        }
+
+        h2 {
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+        }
+
+        #content div {
+            margin-top: 20px;
+            white-space: pre-wrap; /* Keeps JSON output formatted properly */
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        @media screen and (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.hidden {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Navigation Bar Styling */
+        .nav-bar {
+            margin-top: 20px;
+            background-color: #121212;
+            padding: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-bar ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .nav-bar li {
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-bar li a {
+            display: block;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+            border-radius: 5px;
+        }
+
+        .nav-bar li a:hover,
+        .nav-bar li a.active {
+            background-color: #ef5b25;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <img src="integrity.png" alt="Logo">
+        <h2>Cluster Management</h2>
+    </div>
+    <ul class="sidebar-menu">
+        <li><a href="search_without_cache.html"><span>🔍</span> Search</a></li>
+        <li><a href="cache.html"><span>🗂️</span> Cache</a></li>
+        <li><a href="cluster.html" class="active"><span>🖥️</span> Cluster</a></li>
+        <li><a href="documents.html"><span>📄</span> Documents</a></li>
+        <li><a href="re-ranking.html"><span>📊</span> Re-ranking</a></li>
+    </ul>
+</div>
+
+<!-- Top Navbar -->
+<div class="top-nav">
+    <button onclick="toggleSidebar()">☰</button>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <ul>
+            <li><a href="#clusterHealth" onclick="showSection('clusterHealth')">Health</a></li>
+            <li><a href="#nodesStats" onclick="showSection('nodesStats')">Stats</a></li>
+            <li><a href="#specificNodeState" onclick="showSection('specificNodeState')">Specific Node State</a></li>
+            <li><a href="#runningNodes" onclick="showSection('runningNodes')">Running Nodes</a></li>
+        </ul>
+    </nav>
+
+    <div id="content">
+        <!-- Cluster Health -->
+        <section id="clusterHealth" class="active">
+            <h2>Cluster Health</h2>
+            <button id="clusterHealthButton">Get Cluster Health</button>
+            <div id="clusterHealthResults"></div>
+        </section>
+
+        <!-- Nodes Stats -->
+        <section id="nodesStats">
+            <h2>Nodes Stats</h2>
+            <button id="nodesStatsButton">Get Nodes Stats</button>
+            <div id="nodesStatsResults"></div>
+        </section>
+
+        <!-- Specific Node State -->
+        <section id="specificNodeState">
+            <h2>Specific Node State</h2>
+            <form id="specificNodeStateForm">
+                <input type="text" id="specificNodeId" placeholder="Enter Node ID" required>
+                <button type="submit">Get Node State</button>
+            </form>
+            <div id="specificNodeStateResults"></div>
+        </section>
+
+        <!-- Running Nodes -->
+        <section id="runningNodes">
+            <h2>Running Nodes</h2>
+            <form id="runningNodesForm">
+                <input type="text" id="runningNodeId" placeholder="Enter Node ID" required>
+                <button type="submit">Check if Running</button>
+            </form>
+            <div id="runningNodesResults"></div>
+        </section>
+    </div>
+</div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        sidebar.classList.toggle('hidden');
+        mainContent.classList.toggle('full-width');
+    }
+
+    function showSection(sectionId) {
+        document.querySelectorAll('section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(sectionId).classList.add('active');
+    }
+
+    // Event Listeners
+    document.getElementById('clusterHealthButton').addEventListener('click', async () => {
+        const response = await fetch('/api/cluster/health');
+        const data = await response.json();
+        document.getElementById('clusterHealthResults').innerText = JSON.stringify(data, null, 2);
+    });
+
+    document.getElementById('nodesStatsButton').addEventListener('click', async () => {
+        const response = await fetch('/api/cluster/nodes/stats');
+        const data = await response.json();
+        document.getElementById('nodesStatsResults').innerText = JSON.stringify(data, null, 2);
+    });
+
+    document.getElementById('specificNodeStateForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const nodeId = document.getElementById('specificNodeId').value;
+        const response = await fetch(`/api/cluster/nodes/${nodeId}/stats`);
+        const data = await response.json();
+        document.getElementById('specificNodeStateResults').innerText = JSON.stringify(data, null, 2);
+    });
+
+   document.getElementById('runningNodesForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const nodeId = document.getElementById('runningNodeId').value;
+    try {
+        const response = await fetch(`/api/cluster/nodes/${nodeId}/status`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.text(); // Get plain text response
+        document.getElementById('runningNodesResults').innerText = data; // Display plain text
+    } catch (error) {
+        document.getElementById('runningNodesResults').innerText = `Error: ${error.message}`;
+    }
+});
+
+</script>
+</body>
+</html>

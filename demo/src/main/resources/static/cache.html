@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cache and Search with Cache</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #121212;
+            color: white;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 250px;
+            background-color: #121212;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-logo {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sidebar-logo img {
+            width: 50px;
+            height: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            width: 100%;
+        }
+
+        .sidebar-menu li a {
+            display: block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar-menu li a:hover,
+        .sidebar-menu li a.active {
+            background-color: #ef5b25;
+        }
+
+        /* Top Navbar */
+        .top-nav {
+            width: 100%;
+            background-color: #121212;
+            padding: 10px 15px;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .top-nav button {
+            background-color: #ef5b25;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+
+        .top-nav button:hover {
+            background-color: #ed4c11;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 50px; /* Adjust for top-nav height */
+            margin-left: 250px;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            background-color: white;
+            color: #121212;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        .main-content.full-width {
+            margin-left: 0;
+        }
+
+        /* Section Styling */
+        section {
+            padding: 20px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            color: #121212;
+            display: none; /* Hidden by default */
+        }
+
+        section.active {
+            display: block; /* Display the active section */
+        }
+
+        form input, form select, form button {
+            margin: 5px 0;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        button {
+            background-color: #ef5b25;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ed4c11;
+        }
+
+        h2 {
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+        }
+
+        .nav-bar {
+            margin-top: 20px;
+            background-color: #121212;
+            padding: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-bar ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .nav-bar li {
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-bar li a {
+            display: block;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+            border-radius: 5px;
+        }
+
+        .nav-bar li a:hover,
+        .nav-bar li a.active {
+            background-color: #ef5b25;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <img src="integrity.png" alt="Logo">
+        <h2>Distributed Search</h2>
+    </div>
+    <ul class="sidebar-menu">
+        <li><a href="search_without_cache.html"><span>🔍</span> Search</a></li>
+        <li><a href="cache.html" class="active"><span>🗂️</span> Cache</a></li>
+        <li><a href="cluster.html"><span>🖥️</span> Cluster</a></li>
+        <li><a href="documents.html"><span>📄</span> Documents</a></li>
+        <li><a href="re-ranking.html"><span>📊</span> Re-ranking</a></li>
+    </ul>
+</div>
+
+<!-- Top Navbar -->
+<div class="top-nav">
+    <button onclick="toggleSidebar()">☰</button>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <ul>
+            <li><a href="#viewCachedKeys" onclick="showSection('viewCachedKeys')">View Cached Keys</a></li>
+          <!--  <li><a href="#clearCache" onclick="showSection('clearCache')">Clear Specific Cache</a></li>-->
+            <li><a href="#clearAllCache" onclick="showSection('clearAllCache')">Clear All Cache</a></li>
+            <li><a href="#searchWithCache" onclick="showSection('searchWithCache')">Search with Cache</a></li>
+        </ul>
+    </nav>
+
+    <div id="content">
+        <!-- View Cached Keys -->
+        <section id="viewCachedKeys" class="active">
+            <h2>View Cached Keys</h2>
+            <button id="viewKeysButton">View Cached Keys</button>
+            <div id="viewCachedKeysResults"></div>
+        </section>
+
+        <!-- Clear Specific Cache -->
+        <section id="clearCache">
+            <h2>Clear Specific Cache</h2>
+            <form id="clearCacheForm">
+                <input type="text" id="query" name="query" placeholder="Query" required>
+                <input type="text" id="field" name="field" placeholder="Field" required>
+                <input type="number" id="page" name="page" placeholder="Page" min="0" value="0">
+                <input type="number" id="size" name="size" placeholder="Size" min="1" value="10">
+                <button type="submit">Clear Cache</button>
+            </form>
+            <div id="clearCacheResults"></div>
+        </section>
+
+        <!-- Clear All Cache -->
+        <section id="clearAllCache">
+            <h2>Clear All Cache</h2>
+            <button id="clearAllCacheButton">Clear All Cache</button>
+            <div id="clearAllCacheResults"></div>
+        </section>
+
+        <!-- Search with Cache -->
+        <section id="searchWithCache">
+            <h2>Search with Cache</h2>
+            <form id="searchWithCacheForm">
+                <input type="text" id="cacheQuery" name="query" placeholder="Query" required>
+                <input type="text" id="cacheField" name="field" placeholder="Field (optional)">
+                <input type="text" id="cacheFileType" name="fileType" placeholder="File Type (optional)">
+                <input type="text" id="cacheSortField" name="sortField" placeholder="Sort Field (optional)">
+                <select id="cacheSortOrder" name="sortOrder">
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+                <input type="number" id="cachePage" name="page" placeholder="Page" min="0" value="0">
+                <input type="number" id="cacheSize" name="size" placeholder="Size" min="1" value="10">
+                <button type="submit">Search</button>
+            </form>
+            <div id="searchWithCacheResults">
+                <p><strong>Response Time:</strong> <span id="cacheResponseTime">-</span> ms</p>
+                <div id="cacheResultsData"></div>
+            </div>
+
+        </section>
+    </div>
+</div>
+<script>
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        sidebar.classList.toggle('hidden');
+        mainContent.classList.toggle('full-width');
+    }
+
+    function showSection(sectionId) {
+        document.querySelectorAll('section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(sectionId).classList.add('active');
+    }
+
+    async function apiRequest(endpoint, method = 'GET', body = null) {
+        try {
+            const options = { method };
+            if (body) {
+                options.body = JSON.stringify(body);
+                options.headers = { 'Content-Type': 'application/json' };
+            }
+            const response = await fetch(endpoint, options);
+            return await response.json();
+        } catch (error) {
+            console.error('API Request Error:', error);
+            return { error: error.message };
+        }
+    }
+
+    // View Cached Keys
+    document.getElementById('viewKeysButton').addEventListener('click', async () => {
+        const results = await apiRequest('/api/cache/keys');
+        document.getElementById('viewCachedKeysResults').innerText = JSON.stringify(results, null, 2);
+    });
+
+    // Clear Specific Cache
+    document.getElementById('clearCacheForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const query = document.getElementById('query').value;
+        const field = document.getElementById('field').value;
+        const page = document.getElementById('page').value;
+        const size = document.getElementById('size').value;
+        const results = await apiRequest(`/api/cache?query=${query}&field=${field}&page=${page}&size=${size}`, 'DELETE');
+        document.getElementById('clearCacheResults').innerText = JSON.stringify(results, null, 2);
+    });
+// Clear All Cache
+document.getElementById('clearAllCacheButton').addEventListener('click', async () => {
+    const results = await apiRequest('/api/cache/clear-all', 'DELETE');
+    if (results.error) {
+        document.getElementById('clearAllCacheResults').innerText = `Error: ${results.error}`;
+    } else {
+        document.getElementById('clearAllCacheResults').innerText = JSON.stringify(results, null, 2);
+    }
+});
+
+
+    // Search with Cache
+   document.getElementById('searchWithCacheForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const query = document.getElementById('cacheQuery').value;
+    const field = document.getElementById('cacheField').value;
+    const fileType = document.getElementById('cacheFileType').value;
+    const sortField = document.getElementById('cacheSortField').value;
+    const sortOrder = document.getElementById('cacheSortOrder').value;
+    const page = document.getElementById('cachePage').value;
+    const size = document.getElementById('cacheSize').value;
+
+    const params = new URLSearchParams({
+        query,
+        field,
+        fileType,
+        sortField,
+        sortOrder,
+        page,
+        size,
+    }).toString();
+
+    const startTime = performance.now(); // Start time
+    try {
+        const response = await fetch(`/api/search/with-cache?${params}`);
+        const data = await response.json();
+        const endTime = performance.now(); // End time
+        const timeTaken = (endTime - startTime).toFixed(2); // Calculate time taken
+
+        document.getElementById('searchWithCacheResults').innerHTML = `
+            <p><strong>Response Time:</strong> ${timeTaken} ms</p>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+        `;
+    } catch (error) {
+        document.getElementById('searchWithCacheResults').innerText = `Error: ${error.message}`;
+    }
+});
+
+
+</script>
+</body>
+</html>

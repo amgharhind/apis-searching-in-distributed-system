@@ -1,0 +1,6 @@
+flask
+sentence-transformers==2.0.0
+huggingface-hub==0.4.0
+elasticsearch==7.12.0
+torch==1.12.1
+numpy<2.0
