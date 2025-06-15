@@ -1,4 +1,4 @@
-# Distributed Search System Architecture 🔍
+# Distributed Search System Architecture 
 
 This project is a comprehensive, scalable search system built with modern technologies to deliver fast and semantically relevant results. It integrates a distributed Elasticsearch cluster, Redis caching, and a sophisticated two-stage re-ranking pipeline featuring BM25 and DistilBERT. The entire system is orchestrated by a central Spring Boot application and is containerized with Docker for seamless deployment and scalability.
 
@@ -43,5 +43,5 @@ The system is built on a microservices architecture:
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/your-username/apis-searching-in-distributed-system](https://github.com/your-username/apis-searching-in-distributed-system)
+    git clone https://github.com/your-username/apis-searching-in-distributed-system
     ```
