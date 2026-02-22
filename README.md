@@ -161,5 +161,4 @@ Once the system is running, you can interact with the search API exposed by the 
 This project is open-source and available under the [MIT License](LICENSE).
 
 
-This project is open-source and available under the [MIT License](LICENSE).
 
