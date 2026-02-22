@@ -4,7 +4,7 @@
 
 This project implements a comprehensive and scalable distributed search system designed to deliver fast and semantically relevant results. It leverages a microservices architecture, integrating a distributed Elasticsearch cluster for efficient indexing and retrieval, Redis for high-performance caching, and a sophisticated two-stage re-ranking pipeline. The system is orchestrated by a central Spring Boot application and containerized using Docker for seamless deployment and scalability.
 
-##  Motivation and Importance
+## Motivation and Importance
 
 In today's data-rich environment, traditional keyword-based search often falls short in providing truly relevant results. Users expect intelligent search capabilities that understand context and intent. This project addresses this need by combining the speed and scalability of Elasticsearch with the semantic understanding of modern NLP models. The distributed nature ensures high availability and fault tolerance, crucial for enterprise-level applications, while the re-ranking mechanism significantly enhances the quality and relevance of search outcomes.
 
@@ -40,6 +40,30 @@ The Spring Boot application encapsulates several key services:
 *   **ReRankingService:** Acts as a client to the external Flask service. It sends the initial BM25-ranked results and the original query to the Flask service, which then returns a semantically re-ranked list.
 *   **InteractionsReRankingService:** (Conceptual/Future Enhancement) This service would enhance ranking by combining the re-ranked search results with user interaction data (e.g., click-through rates, viewing history) stored in Redis, providing a more personalized search experience.
 *   **RedisCacheService:** Manages all caching operations, including storing search results, validating cache consistency, and clearing outdated entries to ensure data freshness.
+
+## API Endpoints
+
+The Spring Boot application exposes the following API endpoints:
+
+### SearchController
+
+*   `/api/search`: Provides advanced search functionalities with parameters like field, file type, sorting, and pagination.
+    *   **General Search (GET /api/search):** Fetches documents based on the query and optional filters.
+    *   **Wildcard Search (GET /api/search/wildcard):** Performs searches using wildcard patterns on a specified field.
+    *   **Exact Phrase Search (GET /api/search/exact-phrase):** Searches for an exact phrase within a specific field.
+    *   **Proximity Search (GET /api/search/proximity):** Finds documents where words occur within a certain distance of each other.
+    *   **Range Search (GET /api/search/range):** Fetches documents with values in a specific range (e.g., dates, numbers).
+
+### CacheController
+
+*   **GET /api/cache/keys:** Lists all cache keys currently stored in Redis.
+*   **DELETE /api/cache:** Clears the cache for a specific query and its parameters.
+*   **DELETE /api/cache/clear-all:** Clears all cached data from Redis.
+
+### SearchControllerWithCache
+
+*   `/api/search/with-cache`: Combines Elasticsearch querying with Redis caching for optimized performance.
+*   **DELETE /api/search/clear-cache:** Clears cached results for a specific query.
 
 ## Technology Stack
 
@@ -133,6 +157,9 @@ This system is designed to provide:
 Once the system is running, you can interact with the search API exposed by the Spring Boot application. For example, a search query for "machine learning algorithms" might return documents related to various ML techniques, with the DistilBERT re-ranking ensuring that the most contextually relevant documents appear first.
 
 ## License
+
+This project is open-source and available under the [MIT License](LICENSE).
+
 
 This project is open-source and available under the [MIT License](LICENSE).
 
